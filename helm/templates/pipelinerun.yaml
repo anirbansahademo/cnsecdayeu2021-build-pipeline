@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: app-build-pipeline-{{ include "image_tag.formatted" . }}-run
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceAccountName: harbor-creds
+  pipelineRef:
+    name: app-build-pipeline
+  resources:
+    - name: app-source-repo
+      resourceRef:
+        name: app-repo-git
+    - name: app-docker-image
+      resourceRef:
+        name: image-registry

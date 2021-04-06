@@ -1,0 +1,51 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: app-build-pipeline
+  namespace: {{ .Release.Namespace }}
+spec:
+  resources:
+    - name: app-source-repo
+      type: git
+    - name: app-docker-image
+      type: image
+  tasks:
+    - name: build-docker-image
+      taskRef:
+        name: app-docker-build
+      params:
+        - name: pathToDockerFile
+          value: $(resources.inputs.application-repo.path)/app/Dockerfile
+        - name: pathToContext
+          value: $(resources.inputs.application-repo.path)/app
+      resources:
+        inputs:
+          - name: application-repo
+            resource: app-source-repo
+        outputs:
+          - name: docker-image
+            resource: app-docker-image
+    - name: scan-docker-image
+      taskRef:
+        name: app-docker-security-scan
+      runAfter:
+        - build-docker-image
+      resources:
+        inputs:
+          - name: docker-image
+            resource: app-docker-image
+    - name: promote-docker-image
+      taskRef:
+        name: app-docker-promote-image
+      runAfter:
+        - scan-docker-image
+      resources:
+        inputs:
+          - name: docker-image
+            resource: app-docker-image
+    - name: argocd-app-sync
+      taskRef:
+        name: argocd-app-sync
+      runAfter:
+        - promote-docker-image

@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: app-repo-git
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: git
+  params:
+    - name: revision
+      value: main
+    - name: url
+      value: {{ .Values.application_git_repo }}
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: image-registry
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: image
+  params:
+    - name: url
+      value: {{ .Values.registry_server }}
