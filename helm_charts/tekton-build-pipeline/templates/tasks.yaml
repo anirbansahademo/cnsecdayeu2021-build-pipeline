@@ -139,6 +139,8 @@ spec:
     envFrom:
       - configMapRef:
           name: tekton-argocd-cm
+      - configMapRef:
+          name: tekton-docker-cm
   steps:
     - name: app-sync
       image: argoproj/argocd:{{ .Values.argocd_version }}
@@ -155,4 +157,5 @@ spec:
               key: password
       script: |
         argocd login $ARGOCD_SERVER --username $ARGOCD_USERNAME --password $ARGOCD_PASSWORD
+        argocd app set $ARGOCD_APPLICATION_NAME --helm-set-string --helm-set-string app_deploy.image_tag=$DOCKER_TAG
         argocd app sync $ARGOCD_APPLICATION_NAME --server $ARGOCD_SERVER --prune

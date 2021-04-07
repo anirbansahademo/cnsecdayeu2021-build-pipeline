@@ -1,23 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: example-app
+  name: example-app-build-pipeline
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
 spec:
   project: default
   source:
     repoURL: https://github.com/anirbansahademo/cnsecdayeu2021-example-app.git
     targetRevision: HEAD
-    path: helm
+    path: helm-pipeline/
 
     helm:
-      releaseName: example-app
+      releaseName: example-app-build-pipeline
       valueFiles:
-      - values.yaml
+        - values.yaml
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: example-app
+    namespace: argocd
 
   syncPolicy:
     syncOptions:

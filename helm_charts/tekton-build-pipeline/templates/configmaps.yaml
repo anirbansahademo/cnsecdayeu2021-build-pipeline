@@ -17,4 +17,4 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   ARGOCD_SERVER: "{{ .Values.argocd_server }}"
-  ARGOCD_APPLICATION_NAME: {{ .Values.app_name }}
+  ARGOCD_APPLICATION_NAME: {{ .Values.app_name }}-deploy

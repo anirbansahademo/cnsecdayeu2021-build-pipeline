@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.app_name }}
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    name: http
+    targetPort: 80
+  selector:
+    app: {{ .Values.app_name }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app_name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app_name }}
+    spec:
+      containers:
+      - image: {{ .Values.registry_url }}/{{ .Values.image_namespace }}/{{ .Values.app_name }}:{{ .Values.image_tag }}
+        imagePullPolicy: Always
+        name: nginx
+        ports:
+        - containerPort: 80
+          name: http
+      imagePullSecrets:
+      - name: harbor-docker-creds
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Values.app_name }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: {{ .Values.app_name }}.{{ .Values.domain }}
+    http:
+      paths:
+      - backend:
+          serviceName: {{ .Values.app_name }}
+          servicePort: 80
+        path: /*
